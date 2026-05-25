@@ -82,6 +82,27 @@ Follow these steps to get the development environment running on your machine:
     cd project_template
 ```
 
+### Relink & Restore Automated Git Commit Messages
+
+First ensure that you have a .env file in your root directory with you API key for Gemini.
+Example: GEMINI_API_KEY='YOUR_API_KEY'
+
+- **1. Re-Link the Hooks Folder**
+
+You have to explicitly tell this new repository to look inside your copied folder.
+
+```
+    git config core.hooksPath .husky
+```
+
+- **2. Restore Execution Permissions**
+
+When you copy script files, the operating system strips away their "executable" status as a security measure. Even if Git finds the file now, it won't be allowed to run it until you grant permission.
+
+```
+   chmod +x .husky/prepare-commit-msg
+```
+
 ### Setup the Database
 
 Ensure PostgreSQL is running on your machine. Load the provided database dump to create the necessary schemas and initial category data:

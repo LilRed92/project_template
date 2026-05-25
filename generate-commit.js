@@ -1,7 +1,7 @@
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const { execSync } = require("child_process");
 const fs = require("fs");
-//dotenv.config();
 
 const commitMsgFile = process.argv[2];
 const apiKey = process.env.GEMINI_API_KEY;
@@ -81,7 +81,7 @@ async function generateCommitMessage() {
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -97,7 +97,10 @@ async function generateCommitMessage() {
 
     // Extract and clean up the AI's response
     let aiMessage = data.candidates[0].content.parts[0].text.trim();
-    aiMessage = aiMessage.replace(/^```\w*\n|\n```$/g, "");
+    aiMessage = aiMessage
+      .replace(/^```[a-z]*\n/i, "")
+      .replace(/\n```$/i, "")
+      .trim();
 
     // 6. Inject the message into Git
     if (commitMsgFile) {
@@ -105,6 +108,9 @@ async function generateCommitMessage() {
       // Force the AI message to the very top of the file
       fs.writeFileSync(commitMsgFile, aiMessage + "\n\n" + currentMsg);
       console.log(`✅ Success!`);
+    } else {
+      console.log("\n✅ Generated Commit Message:\n");
+      console.log(aiMessage);
     }
   } catch (err) {
     // 7. The Offline Fallback Logic
